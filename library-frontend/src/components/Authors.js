@@ -1,49 +1,40 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
 
 import { ALL_AUTHORS } from '../queries/authorQueries'
 import { EDIT_AUTHOR } from '../mutations/authorMutations'
 
-let counter = 0
-
-const Authors = () => {
-  const result = useQuery(ALL_AUTHORS)
+const BirthForm = ({ authorName }) => {
+  const [value, setValue] = useState('')
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }]
   })
 
-  const [birthFields, setBirthFields] = useState({})
+  const submitBirth = (e) => {
+    e.preventDefault()
+    editAuthor({ variables: { name: authorName, setBornTo: parseInt(value) } })
+  }
 
-  useEffect(() => {
-    if (!result.loading) {
-      setBirthFields(authors.reduce((output, a) => {
-        output[a.name] = ''
-        console.log(output)
-        return output
-      }, {}))
-    }
-  }, [result.loading])
+  return (
+    <form onSubmit={submitBirth}>
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        style={{width: "2.5em"}}
+      />
+      <button type="submit">set</button>
+    </form>
+  )
+}
+
+const Authors = () => {
+  const result = useQuery(ALL_AUTHORS)
 
   if (result.loading) {
     return <p>loading...</p>
   }
 
   const authors = result.data.allAuthors
-
-  counter++
-  console.log(counter)
-  const updateBirthField = (e, name) => {
-    let newState = { ...birthFields }
-    newState[name] = e.target.value
-    setBirthFields(newState)
-  }
-
-  const handleSubmitBirth = (e, name) => {
-    e.preventDefault()
-    console.log(birthFields[name])
-    console.log(name)
-    editAuthor({ variables: { name, setBornTo: parseInt(birthFields[name]) } })
-  }
 
   return (
     <div>
@@ -56,25 +47,20 @@ const Authors = () => {
             <th>born</th>
             <th>books</th>
           </tr>
-          {authors.map((a) => (
-            <tr key={a.name}>
-              <td>{a.name}</td>
-              <td>
-                {a.born
-                  ? a.born
-                  : <form onSubmit={(e) => handleSubmitBirth(e, a.name)}>
-                      <input
-                        value={birthFields[a.name]}
-                        onChange={(e) => updateBirthField(e, a.name)}
-                        style={{width: "2.5em"}}
-                      />
-                      <button type="submit">set</button>
-                    </form>
-                }
-              </td>
-              <td>{a.bookCount}</td>
-            </tr>
-          ))}
+          {authors.map((a, i) => {
+            return (
+              <tr key={a.name}>
+                <td>{a.name}</td>
+                <td>
+                  {a.born
+                    ? a.born
+                    : <BirthForm authorName={a.name} key={a.name} />
+                  }
+                </td>
+                <td>{a.bookCount}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
