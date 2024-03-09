@@ -1,3 +1,5 @@
+const { GraphQLError } = require('graphql')
+
 const Author = require('./models/Author')
 const Book = require('./models/Book')
 
@@ -10,6 +12,9 @@ module.exports = {
 
       if (args.author) {
         const author = await Author.findOne({ name: args.author })
+        if (!author) {
+          return null
+        }
         by.author = author.id
       }
       if (args.genre) {
@@ -34,16 +39,50 @@ module.exports = {
       let author = await Author.findOne({ name: args.author })
       if (!author) {
         author = await new Author({ name: args.author })
-        await author.save()
+        try {
+          await author.save()
+        } catch (error) {
+          throw new GraphQLError('Given author does not exist and could not be created with given name', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.author,
+              error
+            }
+          })
+        }
       }
  
       const newBook = new Book({ ...args, author })
-      return await newBook.save()
+      try {
+        await newBook.save()
+      } catch (error) {
+        throw new GraphQLError('Book could not be created', { extensions: {
+          code: 'BAD_USER_INPUT',
+          error
+        } })
+      }
+
+      return newBook
     },
     editAuthor: async (root, { name, setBornTo: born }) => {
-      const updatedAuthor = await Author.findOneAndUpdate({ name }, { $set: { born } })
+      const author = await Author.findOne({ name })
 
-      return updatedAuthor
+      if (!author) {
+        return null
+      }
+
+      author.born = born
+
+      try {
+        await author.save()
+      } catch (error) {
+        throw new GraphQLError('Author could not be updated', { extensions: {
+          code: 'BAD_USER_INPUT',
+          error
+        } })
+      }
+
+      return author
     }
   }
 }
