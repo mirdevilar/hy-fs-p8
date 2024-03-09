@@ -1,7 +1,9 @@
 const { GraphQLError } = require('graphql')
+const jwt = require('jsonwebtoken')
 
 const Author = require('./models/Author')
 const Book = require('./models/Book')
+const User = require('./models/User')
 
 module.exports = {
   Query: {
@@ -24,6 +26,8 @@ module.exports = {
       return await Book.find(by).populate('author')
     },
     allAuthors: async () => Author.find({}),
+
+    me: (root, args, context) => context.currentUser,
   },
 
   Author: {
@@ -35,7 +39,13 @@ module.exports = {
   },
 
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, { currentUser }) => {
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', { extensions: {
+          code: 'BAD_USER_INPUT',
+        } })
+      }
+
       let author = await Author.findOne({ name: args.author })
       if (!author) {
         author = await new Author({ name: args.author })
@@ -64,7 +74,13 @@ module.exports = {
 
       return newBook
     },
-    editAuthor: async (root, { name, setBornTo: born }) => {
+    editAuthor: async (root, { name, setBornTo: born }, { currentUser }) => {
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', { extensions: {
+          code: 'BAD_USER_INPUT',
+        } })
+      }
+
       const author = await Author.findOne({ name })
 
       if (!author) {
@@ -83,7 +99,38 @@ module.exports = {
       }
 
       return author
-    }
+    },
+
+    createUser: async (root, args) => {
+      const user = new User(args)
+
+      try {
+        await user.save()
+      } catch (error) {
+        throw new GraphQLError('User could not be created', { extensions: {
+          code: 'BAD_USER_INPUT',
+          error
+        } })
+      }
+
+      return user
+    },
+    login: async (root, { username, password }) => {
+      const user = await User.findOne({ username })
+
+      if (!user || password !== 'hirvenliha') {
+        throw new GraphQLError('wrong credentials', { extension: {
+          code: 'BAD_USER_INPUT',
+        } })
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user.id,
+      }
+
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
+    },
   }
 }
 

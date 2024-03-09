@@ -1,24 +1,37 @@
 module.exports = `
+  type Author {
+    name: String!
+    born: Int
+    bookCount(author: String): Int!
+    id: ID!
+  }
+
   type Book {
     title: String!
     published: Int
     author: Author!
-    id: ID!
     genres: [String]!
+    id: ID!
   }
 
-  type Author {
-    name: String!
+  type Token {
+    value: String!
+  }
+
+  type User {
+    username: String!
+    favoriteGenre: String!
     id: ID!
-    born: Int
-    bookCount(author: String): Int!
   }
 
   type Query {
     bookCount: Int
     authorCount: Int
+
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+
+    me: User
   }
 
   type Mutation {
@@ -28,9 +41,20 @@ module.exports = `
       author: String!
       genres: [String]!
     ): Book
+
     editAuthor(
       name: String!
       setBornTo: Int
     ): Author
+
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
+
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 `
