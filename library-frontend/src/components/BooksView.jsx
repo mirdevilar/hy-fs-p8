@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client'
 
 import { ALL_BOOKS } from '../queries/bookQueries'
 
-const Books = () => {
+const BooksView = () => {
   const result = useQuery(ALL_BOOKS)
   
   if (result.loading) {
@@ -35,4 +35,4 @@ const Books = () => {
   )
 }
 
-export default Books
+export default BooksView

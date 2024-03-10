@@ -5,7 +5,7 @@ import { ALL_BOOKS, } from '../queries/bookQueries'
 import { ALL_AUTHORS } from '../queries/authorQueries'
 import { CREATE_BOOK } from '../mutations/bookMutations'
 
-const NewBook = () => {
+const NewBookView = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -77,4 +77,4 @@ const NewBook = () => {
   )
 }
 
-export default NewBook
+export default NewBookView

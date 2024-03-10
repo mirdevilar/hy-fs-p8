@@ -27,7 +27,7 @@ const BirthForm = ({ authorName }) => {
   )
 }
 
-const Authors = () => {
+const AuthorsView = () => {
   const result = useQuery(ALL_AUTHORS)
 
   if (result.loading) {
@@ -67,4 +67,4 @@ const Authors = () => {
   )
 }
 
-export default Authors
+export default AuthorsView
