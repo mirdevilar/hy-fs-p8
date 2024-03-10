@@ -3,11 +3,14 @@ import {
   Routes, Route,
   useNavigate,
 } from 'react-router-dom'
+import { useQuery } from '@apollo/client'
 
 import AuthorsView from './components/AuthorsView'
 import BooksView from './components/BooksView'
 import LoginView from './components/LoginView'
 import NewBookView from './components/NewBookView'
+
+import { ME } from './queries/userQueries'
 
 const NavBar = ({ isLoggedIn, logout }) => {
   const navigate = useNavigate()
@@ -26,13 +29,16 @@ const NavBar = ({ isLoggedIn, logout }) => {
 
 const App = () => {
   const [token, setToken] = useState(null)
+  const user = useQuery(ME)
 
   useEffect(() => {
-  }, [])
+    const localToken = localStorage.getItem('token')
+    setToken(localToken)
+  }, [user.data])
 
   const logout = () => {
     setToken(null)
-    localStorage.setItem('token', null)
+    localStorage.removeItem('token')
   }
 
   return (
@@ -42,7 +48,7 @@ const App = () => {
       <Routes>
         <Route path="/add" element={<NewBookView />} />
         <Route path="/authors" element={<AuthorsView />} />
-        <Route path="/login" element={<LoginView setToken={setToken} />} />
+        {!token && <Route path="/login" element={<LoginView setToken={setToken} />} />}
         <Route path="*" element={<BooksView />} />
       </Routes>
     </div>
