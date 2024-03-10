@@ -9,6 +9,7 @@ import AuthorsView from './components/AuthorsView'
 import BooksView from './components/BooksView'
 import LoginView from './components/LoginView'
 import NewBookView from './components/NewBookView'
+import RecommendedView from './components/RecommendedView'
 
 import { ME } from './queries/userQueries'
 
@@ -17,8 +18,9 @@ const NavBar = ({ isLoggedIn, logout }) => {
 
   return (
     <nav>
-      <button onClick={() => navigate('/books')}>books</button>
+      <button onClick={() => navigate('/')}>books</button>
       <button onClick={() => navigate('/authors')}>authors</button>
+      {isLoggedIn && <button onClick={() => navigate('/recommended')}>recommended</button>}
       {isLoggedIn && <button onClick={() => navigate('/add')}>add book</button>}
 
       {!isLoggedIn && <button onClick={() => navigate('/login')}>login</button>}
@@ -29,12 +31,12 @@ const NavBar = ({ isLoggedIn, logout }) => {
 
 const App = () => {
   const [token, setToken] = useState(null)
-  const user = useQuery(ME)
+  const userQuery = useQuery(ME)
 
   useEffect(() => {
     const localToken = localStorage.getItem('token')
     setToken(localToken)
-  }, [user.data])
+  }, [userQuery.data])
 
   const logout = () => {
     setToken(null)
@@ -48,8 +50,9 @@ const App = () => {
       <Routes>
         <Route path="/add" element={<NewBookView />} />
         <Route path="/authors" element={<AuthorsView token={token} />} />
+        {userQuery.data && userQuery.data.me && <Route path="/recommended" element={<RecommendedView user={userQuery.data.me} />} />}
         {!token && <Route path="/login" element={<LoginView setToken={setToken} />} />}
-        <Route path="*" element={<BooksView />} />
+        <Route path="/" element={<BooksView />} />
       </Routes>
     </div>
   )
