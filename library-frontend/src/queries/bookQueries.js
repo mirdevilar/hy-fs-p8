@@ -10,6 +10,7 @@ query {
       born
     }
     published
+    genres
   }
 }
 `
