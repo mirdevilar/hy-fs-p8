@@ -47,7 +47,7 @@ const App = () => {
 
       <Routes>
         <Route path="/add" element={<NewBookView />} />
-        <Route path="/authors" element={<AuthorsView />} />
+        <Route path="/authors" element={<AuthorsView token={token} />} />
         {!token && <Route path="/login" element={<LoginView setToken={setToken} />} />}
         <Route path="*" element={<BooksView />} />
       </Routes>

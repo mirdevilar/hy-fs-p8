@@ -27,7 +27,7 @@ const BirthForm = ({ authorName }) => {
   )
 }
 
-const AuthorsView = () => {
+const AuthorsView = ({ token }) => {
   const result = useQuery(ALL_AUTHORS)
 
   if (result.loading) {
@@ -52,7 +52,7 @@ const AuthorsView = () => {
               <tr key={a.name}>
                 <td>{a.name}</td>
                 <td>
-                  {a.born
+                  {a.born || !token
                     ? a.born
                     : <BirthForm authorName={a.name} key={a.name} />
                   }
