@@ -12,9 +12,6 @@ const RecommendedView = ({ user }) => {
   }
 
   const books = booksQuery.data.allBooks
-  console.log(books)
-  const bok = books.filter(b => b.genres.includes(user.favoriteGenre))
-  console.log(books[4].genres[0], user.favoriteGenre)
 
   return (
     <div>
