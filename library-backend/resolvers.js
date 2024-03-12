@@ -1,9 +1,13 @@
 const { GraphQLError } = require('graphql')
 const jwt = require('jsonwebtoken')
 
+const { PubSub } = require('graphql-subscriptions')
+
 const Author = require('./models/Author')
 const Book = require('./models/Book')
 const User = require('./models/User')
+
+const pubsub = new PubSub()
 
 module.exports = {
   Query: {
@@ -72,6 +76,8 @@ module.exports = {
         } })
       }
 
+      pubsub.publish('BOOK_ADDED', { bookAdded: newBook })
+
       return newBook
     },
     editAuthor: async (root, { name, setBornTo: born }, { currentUser }) => {
@@ -131,6 +137,12 @@ module.exports = {
 
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
     },
-  }
+  },
+
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator('BOOK_ADDED')
+    },
+  },
 }
 
