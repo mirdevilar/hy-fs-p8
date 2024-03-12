@@ -35,11 +35,6 @@ module.exports = {
   },
 
   Author: {
-    bookCount: (root) => books.filter(b => b.author === root.name).length,
-    bookCount: async (root) => {
-      const books = await Book.find({ author: root.id })
-      return books.length
-    }
   },
 
   Mutation: {
@@ -51,8 +46,12 @@ module.exports = {
       }
 
       let author = await Author.findOne({ name: args.author })
-      if (!author) {
-        author = await new Author({ name: args.author })
+      if (author) {
+        // author = { ...author, bookCount: author.bookCount + 1 }
+        author.bookCount++
+        await author.save()
+      } else {
+        author = await new Author({ name: args.author, bookCount: 1 })
         try {
           await author.save()
         } catch (error) {

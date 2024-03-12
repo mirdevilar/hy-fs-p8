@@ -36,7 +36,6 @@ export const updateCache = (cache, query, addedBook) => {
     allBooks = allBooks.some(b => b.title === addedBook.title)
       ? allBooks
       : allBooks.concat(addedBook)
-    console.log(allBooks)
     return {
       allBooks
     }
@@ -50,7 +49,7 @@ const App = () => {
   useSubscription(BOOK_ADDED, {
     onData: ({ data, client }) => {
       const newBook = data.data.bookAdded
-      // alert(`${newBook} was added!`)
+      alert(`${newBook} was added!`)
       updateCache(client.cache, { query: ALL_BOOKS }, newBook)
     }
   })
