@@ -3,7 +3,7 @@ import {
   Routes, Route,
   useNavigate,
 } from 'react-router-dom'
-import { useQuery } from '@apollo/client'
+import { useQuery, useSubscription } from '@apollo/client'
 
 import AuthorsView from './components/AuthorsView'
 import BooksView from './components/BooksView'
@@ -12,6 +12,7 @@ import NewBookView from './components/NewBookView'
 import RecommendedView from './components/RecommendedView'
 
 import { ME } from './queries/userQueries'
+import { BOOK_ADDED } from './subscriptions'
 
 const NavBar = ({ isLoggedIn, logout }) => {
   const navigate = useNavigate()
@@ -32,6 +33,12 @@ const NavBar = ({ isLoggedIn, logout }) => {
 const App = () => {
   const [token, setToken] = useState(null)
   const userQuery = useQuery(ME)
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      alert(`${data.data.bookAdded.title} was added!`)
+    }
+  })
 
   useEffect(() => {
     const localToken = localStorage.getItem('token')
