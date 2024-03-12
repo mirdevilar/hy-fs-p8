@@ -3,7 +3,7 @@ import {
   Routes, Route,
   useNavigate,
 } from 'react-router-dom'
-import { useQuery, useSubscription } from '@apollo/client'
+import { useQuery, useSubscription, useApolloClient } from '@apollo/client'
 
 import AuthorsView from './components/AuthorsView'
 import BooksView from './components/BooksView'
@@ -13,6 +13,7 @@ import RecommendedView from './components/RecommendedView'
 
 import { ME } from './queries/userQueries'
 import { BOOK_ADDED } from './subscriptions'
+import { ALL_BOOKS } from './queries/bookQueries'
 
 const NavBar = ({ isLoggedIn, logout }) => {
   const navigate = useNavigate()
@@ -30,13 +31,27 @@ const NavBar = ({ isLoggedIn, logout }) => {
   )
 }
 
+export const updateCache = (cache, query, addedBook) => {
+  cache.updateQuery(query, ({ allBooks }) => {
+    allBooks = allBooks.some(b => b.title === addedBook.title)
+      ? allBooks
+      : allBooks.concat(addedBook)
+    console.log(allBooks)
+    return {
+      allBooks
+    }
+  })
+}
+
 const App = () => {
   const [token, setToken] = useState(null)
   const userQuery = useQuery(ME)
 
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
-      alert(`${data.data.bookAdded.title} was added!`)
+    onData: ({ data, client }) => {
+      const newBook = data.data.bookAdded
+      // alert(`${newBook} was added!`)
+      updateCache(client.cache, { query: ALL_BOOKS }, newBook)
     }
   })
 
